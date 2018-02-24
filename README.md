@@ -14,3 +14,6 @@ needs to be updated, each tile gets sent a single digit as read from the matchin
 
 The Program was designed around a linear arrangement of 5 Lifx Tiles with the first tile being on the left and then four more to the 
 right in a straight row. The center tile is not used and can be freely modified without inturrupting the clock.
+
+WARNING: This is an early version of the program and I make no guarentees that it will work for you. But I plan to continue working on it. 
+PLEASE:  Feel free to reach out to me if you try it out and it doesn't work right. Also feel free to suggest changes and improvements.

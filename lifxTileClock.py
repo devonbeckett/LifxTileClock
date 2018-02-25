@@ -18,8 +18,28 @@ LIFX_PROTOCOL          = 1024
 LIFX_PROTOCOL_TAGGED   = 0b00110100
 LIFX_PROTOCOL_UNTAGGED = 0b00010100
 
-c1= Color(rgb=(0, 0, 1)) # Forground Color
-c2= Color(rgb=(0, 0, 0)) # Background Color
+
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Color Data
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////
+def hsbk (hue, sat, lum, kel):
+        return pack("<HHHH",hue,sat,lum,kel)
+
+c1= Color(rgb=(.5, .5, .5)) # Forground Color
+c2= Color(rgb=(0, .25, .25)) # Background Color
+
+# Convert RGB to Hue Saturation Brightnes
+hue = int(c1.hue * 65535)
+sat = int(c1.saturation * 65535)
+brt = int(c1.luminance * 65535)
+
+hue2 = int(c2.hue * 65535)
+sat2 = int(c2.saturation * 65535)
+brt2 = int(c2.luminance * 65535)
+
+# Convert to HSBK format for Lifx protocol
+F = hsbk(hue,sat,brt,0)
+B = hsbk(hue2,sat2,brt2,0)
 
 
 class DeviceMessage:
@@ -90,22 +110,6 @@ class TileMessages:
 ##################################################
 #        Number Image Data                       #
 ##################################################
-
-def hsbk (hue, sat, lum, kel):
-        return pack("HHHH",hue,sat,lum,kel)
-
-# Convert RGB to Hue Saturation Brightnes
-hue = int(c1.hue * 65535)
-sat = int(c1.saturation * 65535)
-brt = int(c1.luminance * 65535)
-
-hue2 = int(c2.hue * 65535)
-sat2 = int(c2.saturation * 65535)
-brt2 = int(c2.luminance * 65535)
-
-# Convert to HSBK format for Lifx protocol
-F = hsbk(hue,sat,brt,0)
-B = hsbk(hue2,sat2,brt2,0)
 
 # All the numbers are just arrays of 64 HSBK color values which represent the 8x8 tile
 # I have an 'image' for each digit plus one that is all background color. I may add some
@@ -329,29 +333,29 @@ t9 = pack("8s8s8s8s8s8s8s8s" +
 def BuildSetTileState64(tile, num):
         global tnull, t1,t2,t3
         if num == 0:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t0)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t0)
         elif num == 1:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t1)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t1)
         elif num == 2:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t2)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t2)
         elif num == 3:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t3)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t3)
         elif num == 4:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t4)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t4)
         elif num == 5:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t5)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t5)
         elif num == 6:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t6)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t6)
         elif num == 7:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t7)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t7)
         elif num == 8:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t8)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t8)
         elif num == 9:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, t9)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t9)
         elif num == 10:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, tfull)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, tfull)
         else:
-                return pack("BBxBBB512s", tile, 1, 0, 0, 8, tnull)
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, tnull)
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -452,7 +456,6 @@ cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 cs.sendto(getServiceMsg, (BROADCAST_ADDR, LIFX_PORT))
 
-
 print "Looking for " + TILE_NAME
 Tile = 0 #default value to detect bulb data later on
 while True:
@@ -481,7 +484,7 @@ while Tile != 0:
                 # Hour 10s
                 TileState64 = BuildSetTileState64(0,hour / 10)
                 TileState64size = len(TileState64)
-                msg = pack("<HBBLQ6xBB8xH2x518s",
+                msg = pack("<HBBLQ6xBB8xH2x522s",
                            # Frame
                            8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
                            0,
@@ -503,7 +506,7 @@ while Tile != 0:
                 # Hour 1s
                 TileState64 = BuildSetTileState64(1,hour % 10)
                 TileState64size = len(TileState64)
-                msg = pack("<HBBLQ6xBB8xH2x518s",
+                msg = pack("<HBBLQ6xBB8xH2x522s",
                            # Frame
                            8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
                            0,
@@ -525,7 +528,7 @@ while Tile != 0:
                 # Minute 10s
                 TileState64 = BuildSetTileState64(3,minute / 10)
                 TileState64size = len(TileState64)
-                msg = pack("<HBBLQ6xBB8xH2x518s",
+                msg = pack("<HBBLQ6xBB8xH2x522s",
                            # Frame
                            8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
                            0,
@@ -547,7 +550,7 @@ while Tile != 0:
                 # Minute 1s
                 TileState64 = BuildSetTileState64(4,minute % 10)
                 TileState64size = len(TileState64)
-                msg = pack("<HBBLQ6xBB8xH2x518s",
+                msg = pack("<HBBLQ6xBB8xH2x522s",
                            # Frame
                            8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
                            0,

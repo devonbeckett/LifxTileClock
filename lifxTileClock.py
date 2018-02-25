@@ -12,14 +12,14 @@ from struct import *
 LOOP_INTERVAL          = 5      # how often we want to check the time (in seconds)
 TILE_NAME              = "Tile" # Set this to what you named your Tile
 CLIENT_ID              = 0      # Make Something up
-BROADCAST_ADDR         = '255.255.255.255' 
+BROADCAST_ADDR         = '255.255.255.255'
 LIFX_PORT              = 56700
 LIFX_PROTOCOL          = 1024
 LIFX_PROTOCOL_TAGGED   = 0b00110100
 LIFX_PROTOCOL_UNTAGGED = 0b00010100
 
 # Set this to False to use a 12 hour clock
-Clock_Mode_24H = True
+Clock_Mode_24H = False
 
 # Use one of the following choices for what to do with the center tile.
 Center_Tile_Ignore     = 0
@@ -28,7 +28,7 @@ Center_Tile_Background = 2
 Center_Tile_Colon     = 3
 
 # Set this to one of the above Center_Tile_ choices.
-Center_Tile_Use = Center_Tile_Colon 
+Center_Tile_Use = Center_Tile_Colon
 
 
 
@@ -100,12 +100,12 @@ class LightMessage:
         StateInfrared = 121
         SetInfrared = 122
 # class LightMessage
-        
+
 class MultiZoneMessage:
         NO_APPLY = 0
         APPLY = 1
         APPLY_ONLY = 2
-        
+
         SetColorZones = 502
         StateZone = 503
         StateMultiZone = 506
@@ -342,7 +342,7 @@ t9 = pack("8s8s8s8s8s8s8s8s" +
           B,B,B,B,B,B,F,B,
           B,B,B,B,B,B,F,B
          )
-		 
+
 tcolon = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
@@ -429,9 +429,9 @@ class LifxPacket:
                         if bulb == 0:
                                 LifxBulbs.append(bulb)
                                 return bulb
-                # Do more here eventually I guess        
-                                        
-                        
+                # Do more here eventually I guess
+
+
 
 ##################################################
 #               Bulb Class                       #
@@ -452,7 +452,7 @@ class LifxBulb:
 
         def __repr__(self):
                 return self.Name
-        
+
         def __str__(self):
                 return self.Name
 
@@ -461,10 +461,10 @@ class LifxBulb:
 
         def Send(self, msg):
                 self.Socket.sendto(msg, self.Address)
-        
-                        
+
+
 ##############################   Lifx Tile Finder   #####################################
-                        
+
 m = []
 LifxBulbs = []
 getServiceMsg = pack("<HBBLQ6xBB8xH3x",
@@ -472,7 +472,7 @@ getServiceMsg = pack("<HBBLQ6xBB8xH3x",
                     37, # (H) Total message Size
                     0, # (B) Lower byte of the protocol field
                     LIFX_PROTOCOL_TAGGED, # (B) Flags and upper bits of the protocol field
-                    CLIENT_ID, # (L) Source 
+                    CLIENT_ID, # (L) Source
                     # Frame Address
                     0, # (Q) Target: zero = all
                     # (xxxxxx) Reserved
@@ -488,6 +488,7 @@ cs.bind(('',LIFX_PORT))
 cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 cs.sendto(getServiceMsg, (BROADCAST_ADDR, LIFX_PORT))
+cs.settimeout(5)
 
 print "Looking for " + TILE_NAME
 Tile = 0 #default value to detect bulb data later on
@@ -503,45 +504,20 @@ while True:
         if Tile != 0:
                 break
 
-if Center_Tile_Use != Center_Tile_Ignore:
-	if Center_Tile_Use == Center_Tile_Forground:
-		TileState64 = BuildSetTileState64(2,10)
-	if Center_Tile_Use == Center_Tile_Colon:
-		TileState64 = BuildSetTileState64(2,11)
-	else:
-		TileState64 = BuildSetTileState64(2,-1)
-	TileState64size = len(TileState64)
-	msg = pack("<HBBLQ6xBB8xH2x522s",
-			   # Frame
-			   8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
-			   0,
-			   0b00110100,
-			   CLIENT_ID,
-			   # Frame Address
-			   0,
-			   0,
-			   Tile.Seq,
-			   # Protocol Header
-			   TileMessages.SetTileState64,
-			   TileState64)
-
-	Tile.Send(msg)
-	Tile.Seq += 1
-	if Tile.Seq >= 256:
-			Tile.Seq = 0
-
+print "Running clock now."
+				
 # run loop
 minute = -1 # initializing the variable so that the update will trigger right away
 while Tile != 0:
         #Check time
         localtime = time.localtime(time.time())
-        
+
         if minute != localtime.tm_min:
-                print str(localtime.tm_hour) + ':' + str(localtime.tm_min)
+                #print str(localtime.tm_hour) + ':' + str(localtime.tm_min)
                 minute = localtime.tm_min
                 hour = localtime.tm_hour
                 if (Clock_Mode_24H == False) and (hour > 12):
-					hour = hour - 12
+                    hour = hour - 12
 
                 # Hour 10s
                 TileState64 = BuildSetTileState64(0,hour / 10)
@@ -581,6 +557,34 @@ while Tile != 0:
                            # Protocol Header
                            TileMessages.SetTileState64,
                            TileState64)
+
+                Tile.Send(msg)
+                Tile.Seq += 1
+                if Tile.Seq >= 256:
+                        Tile.Seq = 0
+
+                # Center Tile
+                if Center_Tile_Use != Center_Tile_Ignore:
+                        if Center_Tile_Use == Center_Tile_Forground:
+                                TileState64 = BuildSetTileState64(2,10)
+                        if Center_Tile_Use == Center_Tile_Colon:
+                                TileState64 = BuildSetTileState64(2,11)
+                        else:
+                                TileState64 = BuildSetTileState64(2,-1)
+                        TileState64size = len(TileState64)
+                        msg = pack("<HBBLQ6xBB8xH2x522s",
+                                   # Frame
+                                   8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
+                                   0,
+                                   0b00110100,
+                                   CLIENT_ID,
+                                   # Frame Address
+                                   0,
+                                   0,
+                                   Tile.Seq,
+                                   # Protocol Header
+                                   TileMessages.SetTileState64,
+                                   TileState64)
 
                 Tile.Send(msg)
                 Tile.Seq += 1
@@ -630,6 +634,6 @@ while Tile != 0:
                 Tile.Seq += 1
                 if Tile.Seq >= 256:
                         Tile.Seq = 0
-                        
-        #wake up ever so often and perform this ...                
-        time.sleep(LOOP_INTERVAL) 
+
+        #wake up ever so often and perform this ...
+        time.sleep(LOOP_INTERVAL)

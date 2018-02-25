@@ -1,5 +1,6 @@
 # LifxTileClock
-A Python Program that can turn a Lifx Tile into a digital wall clock.
+## A Python Program that can turn a Lifx Tile into a digital wall clock.
+![Example Photo](Photos/ExamplePhoto.jpg?raw=true "Example Photo")
 
 To run this program you will nedd to update the variable that stores the name of your Lifx Tile. Optionally you can provide a client id
 (you can make this up). By default the program will check the time every second and update the tiles only when the minute digits have 

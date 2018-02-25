@@ -18,6 +18,19 @@ LIFX_PROTOCOL          = 1024
 LIFX_PROTOCOL_TAGGED   = 0b00110100
 LIFX_PROTOCOL_UNTAGGED = 0b00010100
 
+# Set this to False to use a 12 hour clock
+Clock_Mode_24H = True
+
+# Use one of the following choices for what to do with the center tile.
+Center_Tile_Ignore     = 0
+Center_Tile_Forground  = 1
+Center_Tile_Background = 2
+Center_Tile_Colon     = 3
+
+# Set this to one of the above Center_Tile_ choices.
+Center_Tile_Use = Center_Tile_Colon 
+
+
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Color Data
@@ -329,9 +342,27 @@ t9 = pack("8s8s8s8s8s8s8s8s" +
           B,B,B,B,B,B,F,B,
           B,B,B,B,B,B,F,B
          )
+		 
+tcolon = pack("8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" +
+          "8s8s8s8s8s8s8s8s" ,
+          B,B,B,B,B,B,B,B,
+          B,B,B,F,F,B,B,B,
+          B,B,B,F,F,B,B,B,
+          B,B,B,B,B,B,B,B,
+          B,B,B,B,B,B,B,B,
+          B,B,B,F,F,B,B,B,
+          B,B,B,F,F,B,B,B,
+          B,B,B,B,B,B,B,B
+         )
 
 def BuildSetTileState64(tile, num):
-        global tnull, t1,t2,t3
+        #print "tile[" + str(tile) + "] = " + str(num)
         if num == 0:
                 return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t0)
         elif num == 1:
@@ -354,6 +385,8 @@ def BuildSetTileState64(tile, num):
                 return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, t9)
         elif num == 10:
                 return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, tfull)
+        elif num == 11:
+                return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, tcolon)
         else:
                 return pack("<BBxBBBL512s", tile, 1, 0, 0, 8, 0, tnull)
 
@@ -470,6 +503,33 @@ while True:
         if Tile != 0:
                 break
 
+if Center_Tile_Use != Center_Tile_Ignore:
+	if Center_Tile_Use == Center_Tile_Forground:
+		TileState64 = BuildSetTileState64(2,10)
+	if Center_Tile_Use == Center_Tile_Colon:
+		TileState64 = BuildSetTileState64(2,11)
+	else:
+		TileState64 = BuildSetTileState64(2,-1)
+	TileState64size = len(TileState64)
+	msg = pack("<HBBLQ6xBB8xH2x522s",
+			   # Frame
+			   8 + 16 + 12 + TileState64size, # Size(Frame + Frame Address + Protocol Header + payload
+			   0,
+			   0b00110100,
+			   CLIENT_ID,
+			   # Frame Address
+			   0,
+			   0,
+			   Tile.Seq,
+			   # Protocol Header
+			   TileMessages.SetTileState64,
+			   TileState64)
+
+	Tile.Send(msg)
+	Tile.Seq += 1
+	if Tile.Seq >= 256:
+			Tile.Seq = 0
+
 # run loop
 minute = -1 # initializing the variable so that the update will trigger right away
 while Tile != 0:
@@ -480,6 +540,8 @@ while Tile != 0:
                 print str(localtime.tm_hour) + ':' + str(localtime.tm_min)
                 minute = localtime.tm_min
                 hour = localtime.tm_hour
+                if (Clock_Mode_24H == False) and (hour > 12):
+					hour = hour - 12
 
                 # Hour 10s
                 TileState64 = BuildSetTileState64(0,hour / 10)

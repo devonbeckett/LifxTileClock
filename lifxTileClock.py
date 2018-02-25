@@ -9,7 +9,7 @@ from struct import *
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////
 # GLOBAL DEFINES
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////
-LOOP_INTERVAL          = 5      # how often we want to check the time (in seconds)
+LOOP_INTERVAL          = 2      # how often we want to check the time (in seconds)
 TILE_NAME              = "Tile" # Set this to what you named your Tile
 CLIENT_ID              = 0      # Make Something up
 BROADCAST_ADDR         = '255.255.255.255'
@@ -171,14 +171,14 @@ t0 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
-          B,B,F,F,F,F,F,B,
-          B,F,B,B,B,B,B,F,
-          B,F,B,B,B,B,B,F,
-          B,F,B,B,B,B,B,F,
-          B,F,B,B,B,B,B,F,
-          B,F,B,B,B,B,B,F,
-          B,F,B,B,B,B,B,F,
-          B,B,F,F,F,F,F,B
+          B,B,F,F,F,F,B,B,
+          B,F,F,B,B,F,F,B,
+          B,F,B,B,B,B,F,B,
+          B,F,B,B,B,B,F,B,
+          B,F,B,B,B,B,F,B,
+          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
+          B,B,F,F,F,F,B,B
          )
 
 t1 = pack("8s8s8s8s8s8s8s8s" +
@@ -189,14 +189,14 @@ t1 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
+          B,B,B,B,F,B,B,B,
           B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B,
-          B,B,B,F,F,B,B,B
+          B,B,B,B,F,B,B,B,
+          B,B,B,B,F,B,B,B,
+          B,B,B,B,F,B,B,B,
+          B,B,B,B,F,B,B,B,
+          B,B,B,B,F,B,B,B,
+          B,B,F,F,F,F,B,B
          )
 
 t2 = pack("8s8s8s8s8s8s8s8s" +
@@ -207,14 +207,14 @@ t2 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
-          B,F,F,F,F,F,B,B,
-          B,B,B,B,B,B,F,B,
-          B,B,B,B,B,B,F,B,
-          B,B,B,B,B,B,F,B,
           B,B,F,F,F,F,B,B,
+          B,F,B,B,B,F,F,B,
+          B,B,B,B,B,B,F,B,
+          B,B,B,B,B,F,F,B,
+          B,B,B,F,F,F,B,B,
+          B,B,F,F,B,B,B,B,
           B,F,B,B,B,B,B,B,
-          B,F,B,B,B,B,B,B,
-          B,B,F,F,F,F,F,B
+          B,F,F,F,F,F,F,B
          )
 
 t3 = pack("8s8s8s8s8s8s8s8s" +
@@ -265,10 +265,10 @@ t5 = pack("8s8s8s8s8s8s8s8s" +
           B,F,B,B,B,B,B,B,
           B,F,B,B,B,B,B,B,
           B,F,F,F,F,F,B,B,
-          B,B,B,B,B,B,F,B,
-          B,B,B,B,B,B,F,B,
-          B,B,B,B,B,B,F,B,
-          B,F,F,F,F,F,B,B
+          B,B,B,B,B,F,F,B,
+          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
+          B,B,F,F,F,F,B,B
          )
 
 t6 = pack("8s8s8s8s8s8s8s8s" +
@@ -279,13 +279,13 @@ t6 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
-          B,B,F,B,B,B,B,B,
-          B,F,B,B,B,B,B,B,
+          B,B,F,F,B,B,B,B,
+          B,F,F,B,B,B,B,B,
           B,F,B,B,B,B,B,B,
           B,F,B,F,F,F,B,B,
-          B,F,F,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
           B,F,B,B,B,B,F,B,
-          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
           B,B,F,F,F,F,B,B
          )
 
@@ -297,10 +297,10 @@ t7 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
-          B,B,F,F,F,F,F,B,
+          B,F,F,F,F,F,F,B,
+          B,B,B,B,B,B,F,B,
           B,B,B,B,B,B,F,B,
           B,B,B,B,B,F,B,B,
-          B,B,B,B,F,B,B,B,
           B,B,B,B,F,B,B,B,
           B,B,B,F,B,B,B,B,
           B,B,B,F,B,B,B,B,
@@ -316,12 +316,12 @@ t8 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
           B,B,F,F,F,F,B,B,
-          B,F,B,B,B,B,F,B,
-          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
+          B,F,F,B,B,F,F,B,
           B,B,F,F,F,F,B,B,
+          B,F,F,B,B,F,F,B,
           B,F,B,B,B,B,F,B,
-          B,F,B,B,B,B,F,B,
-          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
           B,B,F,F,F,F,B,B
          )
 
@@ -333,10 +333,10 @@ t9 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
-          B,B,B,F,F,F,B,B,
-          B,B,F,B,B,B,F,B,
+          B,B,F,F,F,F,F,B,
+          B,F,F,B,B,B,F,B,
           B,F,B,B,B,B,F,B,
-          B,F,B,B,B,B,F,B,
+          B,F,F,B,B,B,F,B,
           B,B,F,F,F,F,F,B,
           B,B,B,B,B,B,F,B,
           B,B,B,B,B,B,F,B,
@@ -505,7 +505,7 @@ while True:
                 break
 
 print "Running clock now."
-				
+
 # run loop
 minute = -1 # initializing the variable so that the update will trigger right away
 while Tile != 0:

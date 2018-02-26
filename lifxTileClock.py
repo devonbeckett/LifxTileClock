@@ -208,12 +208,12 @@ t2 = pack("8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" +
           "8s8s8s8s8s8s8s8s" ,
           B,B,F,F,F,F,B,B,
-          B,F,B,B,B,F,F,B,
-          B,B,B,B,B,B,F,B,
+          B,F,F,B,B,F,F,B,
+          B,F,B,B,B,B,F,B,
           B,B,B,B,B,F,F,B,
-          B,B,B,F,F,F,B,B,
+          B,B,B,B,F,F,B,B,
+          B,B,B,F,F,B,B,B,
           B,B,F,F,B,B,B,B,
-          B,F,B,B,B,B,B,B,
           B,F,F,F,F,F,F,B
          )
 
